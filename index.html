@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Villas Reina — Financial Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  /* ── Header ── */
+  .header { background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%); border-bottom: 1px solid #2d3748; padding: 24px 32px; }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .header h1 { font-size: 20px; font-weight: 700; color: #f7fafc; letter-spacing: -0.3px; }
+  .header p { font-size: 12px; color: #718096; margin-top: 3px; }
+  .header-date { font-size: 11px; color: #4a5568; padding-top: 4px; white-space: nowrap; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
+  .metric { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 14px 18px; }
+  .metric-label { font-size: 10px; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric-value { font-size: 22px; font-weight: 800; margin-top: 5px; }
+  .metric-value.green  { color: #48bb78; }
+  .metric-value.red    { color: #f56565; }
+  .metric-value.yellow { color: #ed8936; }
+  .metric-value.blue   { color: #63b3ed; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 4px; padding: 14px 32px; background: #0f1117; border-bottom: 1px solid #1a202c; overflow-x: auto; }
+  .tab { padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #718096; transition: all 0.15s; border: 1px solid transparent; white-space: nowrap; user-select: none; }
+  .tab:hover { color: #e2e8f0; background: #1a1f2e; }
+  .tab.active { color: #f7fafc; background: #2d3748; border-color: #4a5568; }
+  .tab-badge { display: inline-block; background: #ed8936; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 5px; vertical-align: middle; }
+
+  /* ── Content ── */
+  .content { padding: 28px 32px; max-width: 1100px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Section title ── */
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #718096; margin-bottom: 14px; }
+
+  /* ── Form card ── */
+  .form-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 22px; margin-bottom: 28px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 10px; font-weight: 700; color: #a0aec0; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-group input,
+  .form-group select { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; color: #e2e8f0; font-size: 13px; padding: 9px 12px; outline: none; font-family: inherit; transition: border-color 0.15s; }
+  .form-group input:focus,
+  .form-group select:focus { border-color: #4a5568; }
+  .form-group select option { background: #1a1f2e; }
+
+  .btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: #4a5568; color: #f7fafc; }
+  .btn-primary:hover { background: #5a6578; }
+  .btn-green { background: rgba(72,187,120,0.12); color: #48bb78; border: 1px solid rgba(72,187,120,0.3); }
+  .btn-green:hover { background: rgba(72,187,120,0.22); }
+  .btn-sm { padding: 5px 10px; font-size: 11px; font-weight: 600; border-radius: 6px; cursor: pointer; border: none; font-family: inherit; }
+  .btn-danger { background: rgba(245,101,101,0.1); color: #f56565; border: 1px solid rgba(245,101,101,0.2); }
+  .btn-danger:hover { background: rgba(245,101,101,0.2); }
+  .form-actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .form-error { color: #f56565; font-size: 12px; }
+
+  /* ── Type toggle ── */
+  .type-toggle { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .type-btn { padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #2d3748; background: transparent; color: #718096; transition: all 0.15s; font-family: inherit; }
+  .type-btn.active { background: #2d3748; color: #f7fafc; border-color: #4a5568; }
+
+  /* ── Entry list ── */
+  .entries-list { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; overflow: hidden; }
+  .entry-empty { padding: 36px; text-align: center; color: #4a5568; font-size: 13px; }
+  .entry-row { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid #1a202c; transition: background 0.1s; }
+  .entry-row:last-child { border-bottom: none; }
+  .entry-row:hover { background: rgba(255,255,255,0.015); }
+
+  /* ── Badge ── */
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .badge-gasto    { background: rgba(245,101,101,0.15); color: #f56565; }
+  .badge-factura  { background: rgba(237,137,54,0.15);  color: #ed8936; }
+  .badge-income   { background: rgba(72,187,120,0.15);  color: #48bb78; }
+  .badge-checked  { background: rgba(99,179,237,0.15);  color: #63b3ed; }
+  .badge-atm      { background: rgba(72,187,120,0.15);  color: #48bb78; }
+  .badge-salary   { background: rgba(245,101,101,0.15); color: #f56565; }
+  .badge-cashin   { background: rgba(72,187,120,0.15);  color: #48bb78; }
+  .badge-pending  { background: rgba(160,174,192,0.1);  color: #a0aec0; }
+  .badge-synced   { background: rgba(72,187,120,0.2);   color: #48bb78; }
+  .badge-error    { background: rgba(245,101,101,0.2);  color: #f56565; }
+
+  /* ── Checkout tab ── */
+  .checkout-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #1a202c; }
+  .checkout-row:last-child { border-bottom: none; }
+  .checkout-row.overdue { background: rgba(237,137,54,0.04); border-left: 3px solid rgba(237,137,54,0.5); padding-left: 15px; }
+  .checkout-row.processed { opacity: 0.35; pointer-events: none; }
+  .checkout-check { width: 17px; height: 17px; cursor: pointer; accent-color: #48bb78; flex-shrink: 0; }
+  .overdue-pill { font-size: 10px; background: rgba(237,137,54,0.15); color: #ed8936; padding: 2px 8px; border-radius: 4px; font-weight: 700; white-space: nowrap; }
+
+  /* ── All movements ── */
+  .filters { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-group { display: flex; flex-direction: column; gap: 5px; }
+  .filter-group label { font-size: 10px; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.4px; }
+  .filter-group select,
+  .filter-group input { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 7px; color: #e2e8f0; font-size: 12px; padding: 7px 10px; outline: none; font-family: inherit; }
+
+  .mov-table { width: 100%; }
+  .mov-row { display: grid; grid-template-columns: 1fr 80px 70px 90px 90px 80px; align-items: center; gap: 8px; padding: 11px 18px; border-bottom: 1px solid #1a202c; }
+  .mov-row:last-child { border-bottom: none; }
+  .mov-row:hover { background: rgba(255,255,255,0.015); }
+  .mov-header { font-size: 10px; color: #4a5568; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; background: transparent !important; border-bottom: 1px solid #2d3748 !important; }
+
+  /* ── Cash movement tab ── */
+  .cash-balance-box { background: linear-gradient(135deg, rgba(72,187,120,0.06) 0%, #1a1f2e 100%); border: 1px solid rgba(72,187,120,0.2); border-radius: 12px; padding: 22px 28px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .cash-bal-main-label { font-size: 11px; color: #68d391; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .cash-bal-value { font-size: 38px; font-weight: 900; color: #48bb78; line-height: 1; }
+  .cash-bal-value.negative { color: #f56565; }
+  .cash-bal-sub { font-size: 11px; color: #718096; margin-top: 6px; }
+  .cash-bal-stats { text-align: right; }
+  .cash-bal-stats div { font-size: 13px; font-weight: 600; }
+  .cash-bal-stats .stat-label { font-size: 10px; color: #718096; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+
+  .cash-row { display: grid; grid-template-columns: 90px 1fr 75px 90px 100px 50px; align-items: center; gap: 8px; padding: 11px 18px; border-bottom: 1px solid #1a202c; }
+  .cash-row:last-child { border-bottom: none; }
+  .cash-row:hover { background: rgba(255,255,255,0.015); }
+  .cash-header { font-size: 10px; color: #4a5568; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; background: transparent !important; border-bottom: 1px solid #2d3748 !important; }
+  .running-bal { font-size: 12px; font-weight: 700; text-align: right; }
+  .running-bal.pos { color: #48bb78; }
+  .running-bal.neg { color: #f56565; }
+
+  /* ── Shared text helpers ── */
+  .t-main  { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+  .t-sub   { font-size: 11px; color: #718096; margin-top: 2px; }
+  .t-sm    { font-size: 12px; color: #a0aec0; }
+  .t-xs    { font-size: 11px; color: #718096; }
+  .t-right { text-align: right; }
+  .t-neg   { font-size: 13px; font-weight: 700; color: #f56565; }
+  .t-pos   { font-size: 13px; font-weight: 700; color: #48bb78; }
+  .flex-1  { flex: 1; min-width: 0; }
+  .qbo-tag { font-size: 10px; color: #718096; white-space: nowrap; }
+
+  .hidden { display: none !important; }
+
+  /* ── Loading overlay ── */
+  #loadingOverlay {
+    position: fixed; inset: 0; background: #0f1117; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px;
+  }
+  .loading-spinner {
+    width: 32px; height: 32px; border: 3px solid #2d3748;
+    border-top-color: #48bb78; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 800px) {
+    .header, .content { padding: 16px; }
+    .tabs { padding: 10px 16px; }
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .mov-row { grid-template-columns: 1fr 70px 80px 70px; }
+    .mov-row > :nth-child(3),
+    .mov-row > :nth-child(6) { display: none; }
+    .cash-row { grid-template-columns: 80px 1fr 70px 80px 40px; }
+    .cash-row > :nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay — shown while data fetches on page open -->
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:13px;color:#718096;">Loading data…</div>
+</div>
+
+<!-- ══════════════════════════ HEADER ══════════════════════════ -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>Villas Reina — Financial Dashboard</h1>
+      <p>Gestión Hotelera Lanzarote S.L. · Data entry &amp; QuickBooks sync</p>
+    </div>
+    <div class="header-date" id="headerDate"></div>
+  </div>
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total Expenses</div>
+      <div class="metric-value red" id="mExpenses">€0.00</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total Income</div>
+      <div class="metric-value green" id="mIncome">€0.00</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Outstanding Liabilities</div>
+      <div class="metric-value yellow" id="mLiabilities">€0.00</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Cash Box Balance</div>
+      <div class="metric-value blue" id="mCash">€0.00</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ TABS ══════════════════════════ -->
+<div class="tabs">
+  <div class="tab active"  onclick="switchTab('expenses',  this)">Expenses</div>
+  <div class="tab"         onclick="switchTab('income',    this)">Income</div>
+  <div class="tab"         onclick="switchTab('checkouts', this)" id="tabCheckouts">Checkouts</div>
+  <div class="tab"         onclick="switchTab('movements', this)">All Movements</div>
+  <div class="tab"         onclick="switchTab('cash',      this)">Cash Movement</div>
+</div>
+
+<!-- ══════════════════════════ CONTENT ══════════════════════════ -->
+<div class="content">
+
+  <!-- ─── TAB: EXPENSES ─── -->
+  <div id="panel-expenses" class="panel active">
+    <div class="form-card">
+      <div class="section-title">Log New Expense</div>
+      <div class="type-toggle" id="expTypeToggle">
+        <button class="type-btn active" onclick="setExpenseType('gasto')">Gasto (Immediate Payment)</button>
+        <button class="type-btn"        onclick="setExpenseType('factura')">Factura de Proveedor</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="eDate">
+        </div>
+        <div class="form-group">
+          <label>Villa *</label>
+          <select id="eVilla">
+            <option value="">Select villa…</option>
+            <option>Cathaysa</option>
+            <option>Fayna</option>
+            <option>Ico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="eCategory">
+            <option value="">Select category…</option>
+            <option>Maintenance</option>
+            <option>Cleaning</option>
+            <option>Utilities</option>
+            <option>Supplies</option>
+            <option>Insurance</option>
+            <option>Salaries</option>
+            <option>Marketing</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (€) *</label>
+          <input type="number" id="eAmount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="form-group factura-field hidden">
+          <label>Supplier *</label>
+          <input type="text" id="eSupplier" placeholder="Supplier name…">
+        </div>
+        <div class="form-group factura-field hidden">
+          <label>Due Date</label>
+          <input type="date" id="eDueDate">
+        </div>
+        <div class="form-group full">
+          <label>Description (optional)</label>
+          <input type="text" id="eDesc" placeholder="Brief description…">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+        <span class="form-error" id="eErr"></span>
+      </div>
+    </div>
+
+    <div class="section-title">Logged Expenses</div>
+    <div class="entries-list" id="expensesList">
+      <div class="entry-empty">No expenses logged yet.</div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: INCOME ─── -->
+  <div id="panel-income" class="panel">
+    <div class="form-card">
+      <div class="section-title">Log Booking &amp; Payment</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date of Payment *</label>
+          <input type="date" id="iDate">
+        </div>
+        <div class="form-group">
+          <label>Guest Name *</label>
+          <input type="text" id="iGuest" placeholder="Guest name…">
+        </div>
+        <div class="form-group">
+          <label>Villa *</label>
+          <select id="iVilla">
+            <option value="">Select villa…</option>
+            <option>Cathaysa</option>
+            <option>Fayna</option>
+            <option>Ico</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (€) *</label>
+          <input type="number" id="iAmount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Payment Method *</label>
+          <select id="iMethod">
+            <option value="">Select method…</option>
+            <option>Stripe</option>
+            <option>Bank Transfer</option>
+            <option>Cash</option>
+            <option>Credit Card</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Booking Channel *</label>
+          <select id="iChannel">
+            <option value="">Select channel…</option>
+            <option>Airbnb</option>
+            <option>Booking.com</option>
+            <option>Direct</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Check-in Date</label>
+          <input type="date" id="iCheckin">
+        </div>
+        <div class="form-group">
+          <label>Checkout Date *</label>
+          <input type="date" id="iCheckout">
+        </div>
+        <div class="form-group">
+          <label>Booking Reference (optional)</label>
+          <input type="text" id="iRef" placeholder="Airbnb ID, booking ref…">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-green" onclick="addIncome()">Log Booking &amp; Create Liability Invoice</button>
+        <span class="form-error" id="iErr"></span>
+      </div>
+    </div>
+
+    <div class="section-title">Logged Bookings</div>
+    <div class="entries-list" id="incomeList">
+      <div class="entry-empty">No bookings logged yet.</div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: CHECKOUTS ─── -->
+  <div id="panel-checkouts" class="panel">
+    <div style="margin-bottom: 20px;">
+      <p class="t-sm" style="line-height: 1.6;">Guests below have paid but not yet checked out. Their payment is held as a liability. Tick the checkbox when a guest leaves — this converts the liability to earned revenue in QuickBooks, dated with their checkout date.</p>
+    </div>
+    <div class="entries-list" id="checkoutsList">
+      <div class="entry-empty">No pending checkouts.</div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: ALL MOVEMENTS ─── -->
+  <div id="panel-movements" class="panel">
+    <div class="filters">
+      <div class="filter-group">
+        <label>Type</label>
+        <select id="fType" onchange="renderMovements()">
+          <option value="all">All Types</option>
+          <option value="expense">Expenses</option>
+          <option value="income">Income</option>
+          <option value="checkout">Checkouts</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Villa</label>
+        <select id="fVilla" onchange="renderMovements()">
+          <option value="all">All Villas</option>
+          <option>Cathaysa</option>
+          <option>Fayna</option>
+          <option>Ico</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Payment Method</label>
+        <select id="fMethod" onchange="renderMovements()">
+          <option value="all">All Methods</option>
+          <option>Stripe</option>
+          <option>Bank Transfer</option>
+          <option>Cash</option>
+          <option>Credit Card</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" id="fFrom" onchange="renderMovements()">
+      </div>
+      <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" id="fTo" onchange="renderMovements()">
+      </div>
+    </div>
+    <div class="entries-list">
+      <div class="mov-row mov-header">
+        <span>Description</span>
+        <span>Type</span>
+        <span>Villa</span>
+        <span>Date</span>
+        <span class="t-right">Amount</span>
+        <span>Method</span>
+      </div>
+      <div id="movementsList"><div class="entry-empty">No transactions yet.</div></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: CASH MOVEMENT ─── -->
+  <div id="panel-cash" class="panel">
+
+    <div class="cash-balance-box">
+      <div>
+        <div class="cash-bal-main-label">Current Cash Box Balance</div>
+        <div class="cash-bal-value" id="cashBalValue">€0.00</div>
+        <div class="cash-bal-sub">Petty cash on hand · updates live</div>
+      </div>
+      <div class="cash-bal-stats">
+        <div class="stat-label">This period</div>
+        <div style="color: #48bb78;">In &nbsp;<span id="cashTotalIn" style="font-size:15px;">€0.00</span></div>
+        <div style="color: #f56565; margin-top: 6px;">Out <span id="cashTotalOut" style="font-size:15px;">€0.00</span></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-title">Record Manual Cash Movement</div>
+      <div class="type-toggle" id="cashTypeToggle">
+        <button class="type-btn active" onclick="setCashType('atm')">ATM Withdrawal (Cash In)</button>
+        <button class="type-btn"        onclick="setCashType('salary')">Salary Payment (Cash Out)</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="cDate">
+        </div>
+        <div class="form-group">
+          <label>Amount (€) *</label>
+          <input type="number" id="cAmount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="form-group salary-field hidden">
+          <label>Employee *</label>
+          <input type="text" id="cEmployee" placeholder="Employee name…">
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <input type="text" id="cNotes" placeholder="e.g. March salary, ATM Caixabank…">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addCashMovement()">Record Movement</button>
+        <span class="form-error" id="cErr"></span>
+      </div>
+    </div>
+
+    <div class="section-title">Cash Box Ledger</div>
+    <div class="entries-list">
+      <div class="cash-row cash-header">
+        <span>Date</span>
+        <span>Description</span>
+        <span>Type</span>
+        <span class="t-right">Amount</span>
+        <span class="t-right">Running Balance</span>
+        <span></span>
+      </div>
+      <div id="cashList"><div class="entry-empty">No cash movements yet. Guest cash payments will appear here automatically.</div></div>
+    </div>
+
+  </div>
+</div><!-- /content -->
+
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+//  SUPABASE — cloud database connection
+//  Data entered here is saved permanently and syncs across all
+//  devices. Bianka's entries on her phone appear instantly on
+//  Sebastian's laptop, and survive any page refresh.
+// ══════════════════════════════════════════════════════════════
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const SUPABASE_URL = 'https://lcewyjghjemhmgqqaqab.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9JYQ4Fs0qKTxcv5DbPg9WA_FKCKVQkS';
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══════════════════════════════════════════════════════════════
+//  STATE — local copies of database data (populated on load)
+// ══════════════════════════════════════════════════════════════
+let expenses   = [];
+let income     = [];
+let cashManual = [];
+let _expType   = 'gasto';
+let _cashType  = 'atm';
+
+// ══════════════════════════════════════════════════════════════
+//  INIT — runs when the page opens
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('headerDate').textContent =
+    new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const today = todayStr();
+  ['eDate', 'iDate', 'cDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+  await loadAllData();
+  startQBORealtime();
+});
+
+// ══════════════════════════════════════════════════════════════
+//  LOAD ALL DATA FROM DATABASE
+//  Called once on page open — fetches all three tables and
+//  populates the dashboard. This is what makes it persistent.
+// ══════════════════════════════════════════════════════════════
+async function loadAllData() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.style.display = 'flex';
+
+  function showOverlayError(msg, detail) {
+    overlay.innerHTML = `
+      <div style="color:#f56565;font-size:14px;text-align:center;padding:32px;max-width:380px;line-height:1.8;">
+        ⚠️ ${msg}<br>
+        <span style="color:#718096;font-size:11px;word-break:break-all;">${detail || ''}</span><br><br>
+        <button onclick="location.reload()" style="background:#2d3748;color:#e2e8f0;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:12px;">Retry</button>
+      </div>`;
+  }
+
+  // 15-second timeout guard — prevents silent hangs
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Connection timed out after 15 seconds')), 15000)
+  );
+
+  try {
+    const [expRes, incRes, cashRes] = await Promise.race([
+      Promise.all([
+        sb.from('expenses').select('*').order('created_at', { ascending: false }),
+        sb.from('income').select('*').order('created_at', { ascending: false }),
+        sb.from('cash_manual').select('*').order('created_at', { ascending: false })
+      ]),
+      timeout.then(() => { throw new Error('Timed out'); })
+    ]);
+
+    if (expRes.error || incRes.error || cashRes.error) {
+      const errMsg = (expRes.error || incRes.error || cashRes.error).message;
+      showOverlayError('Could not read from database.', errMsg);
+      return;
+    }
+
+    // Map database column names (snake_case) to the JS object keys used throughout the UI
+    expenses = (expRes.data || []).map(r => ({
+      id: r.id, date: r.date, type: r.type, villa: r.villa,
+      category: r.category, amount: parseFloat(r.amount),
+      supplier: r.supplier, dueDate: r.due_date, desc: r.description,
+      qboStatus: r.qbo_status || null
+    }));
+
+    income = (incRes.data || []).map(r => ({
+      id: r.id, date: r.date, guest: r.guest, villa: r.villa,
+      amount: parseFloat(r.amount), method: r.method, channel: r.channel,
+      checkin: r.checkin, checkout: r.checkout,
+      ref: r.booking_ref, checkedOut: r.checked_out,
+      qboStatus: r.qbo_status || null
+    }));
+
+    cashManual = (cashRes.data || []).map(r => ({
+      id: r.id, date: r.date, type: r.type,
+      amount: parseFloat(r.amount), employee: r.employee, notes: r.notes,
+      qboStatus: r.qbo_status || null
+    }));
+
+    overlay.style.display = 'none';
+    renderExpenses();
+    renderIncome();
+    updateMetrics();
+
+  } catch (err) {
+    showOverlayError('Could not connect to database.', err.message || 'Unknown error — open browser console (F12) for details.');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  QBO REALTIME — badge updates when Edge Function syncs
+// ══════════════════════════════════════════════════════════════
+function startQBORealtime() {
+  sb.channel('qbo-status')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'expenses' }, ({ new: rec }) => {
+      const entry = expenses.find(e => e.id === rec.id);
+      if (entry) { entry.qboStatus = rec.qbo_status; renderExpenses(); }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'income' }, ({ new: rec }) => {
+      const entry = income.find(e => e.id === rec.id);
+      if (entry) { entry.qboStatus = rec.qbo_status; renderIncome(); }
+    })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cash_manual' }, ({ new: rec }) => {
+      const entry = cashManual.find(e => e.id === rec.id);
+      if (entry) { entry.qboStatus = rec.qbo_status; renderCash(); }
+    })
+    .subscribe();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════════
+
+// Returns the correct QBO status badge based on qbo_status field value
+function qboTag(status) {
+  if (status === 'synced') return '<span class="badge badge-synced" style="min-width:55px;">QBO: ✓</span>';
+  if (status === 'error')  return '<span class="badge badge-error"  style="min-width:55px;">QBO: !</span>';
+  return '<span class="badge badge-pending" style="min-width:55px;">QBO: —</span>';
+}
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function fmt(n) {
+  return '€' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y, m, day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════════════════════
+function switchTab(name, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'checkouts') renderCheckouts();
+  if (name === 'movements') renderMovements();
+  if (name === 'cash')      renderCash();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  EXPENSE TYPE TOGGLE
+// ══════════════════════════════════════════════════════════════
+function setExpenseType(t) {
+  _expType = t;
+  const btns = document.querySelectorAll('#expTypeToggle .type-btn');
+  btns[0].classList.toggle('active', t === 'gasto');
+  btns[1].classList.toggle('active', t === 'factura');
+  document.querySelectorAll('.factura-field').forEach(el => el.classList.toggle('hidden', t !== 'factura'));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CASH TYPE TOGGLE
+// ══════════════════════════════════════════════════════════════
+function setCashType(t) {
+  _cashType = t;
+  const btns = document.querySelectorAll('#cashTypeToggle .type-btn');
+  btns[0].classList.toggle('active', t === 'atm');
+  btns[1].classList.toggle('active', t === 'salary');
+  document.querySelectorAll('.salary-field').forEach(el => el.classList.toggle('hidden', t !== 'salary'));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  METRICS
+// ══════════════════════════════════════════════════════════════
+function updateMetrics() {
+  const totalExp = expenses.reduce((s, e) => s + e.amount, 0);
+  const totalInc = income.reduce((s, e) => s + e.amount, 0);
+  const liab     = income.filter(e => !e.checkedOut).reduce((s, e) => s + e.amount, 0);
+  const cashBal  = calcCashBalance();
+
+  document.getElementById('mExpenses').textContent    = fmt(totalExp);
+  document.getElementById('mIncome').textContent      = fmt(totalInc);
+  document.getElementById('mLiabilities').textContent = fmt(liab);
+
+  const cashEl = document.getElementById('mCash');
+  cashEl.textContent = fmt(cashBal);
+  cashEl.className   = 'metric-value ' + (cashBal < 0 ? 'red' : 'blue');
+
+  // Checkout tab badge — shows count of overdue checkouts
+  const overdue = income.filter(e => !e.checkedOut && e.checkout < todayStr()).length;
+  const tabEl   = document.getElementById('tabCheckouts');
+  const existing = tabEl.querySelector('.tab-badge');
+  if (existing) existing.remove();
+  if (overdue > 0) {
+    const badge = document.createElement('span');
+    badge.className   = 'tab-badge';
+    badge.textContent = overdue;
+    tabEl.appendChild(badge);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  EXPENSES
+// ══════════════════════════════════════════════════════════════
+async function addExpense() {
+  const date     = document.getElementById('eDate').value;
+  const villa    = document.getElementById('eVilla').value;
+  const category = document.getElementById('eCategory').value;
+  const amount   = parseFloat(document.getElementById('eAmount').value);
+  const desc     = document.getElementById('eDesc').value.trim();
+  const supplier = document.getElementById('eSupplier').value.trim();
+  const dueDate  = document.getElementById('eDueDate').value;
+  const errEl    = document.getElementById('eErr');
+
+  if (!date || !villa || !category || !amount || amount <= 0) {
+    errEl.textContent = 'Please fill in all required fields.'; return;
+  }
+  if (_expType === 'factura' && !supplier) {
+    errEl.textContent = 'Supplier is required for a Factura.'; return;
+  }
+  errEl.textContent = 'Saving…';
+
+  const { data, error } = await sb.from('expenses').insert({
+    date, type: _expType, villa, category, amount,
+    supplier:    supplier || null,
+    due_date:    dueDate  || null,
+    description: desc     || null
+  }).select().single();
+
+  if (error) {
+    errEl.textContent = 'Failed to save. Please check your connection and try again.'; return;
+  }
+  errEl.textContent = '';
+
+  expenses.unshift({
+    id: data.id, date: data.date, type: data.type, villa: data.villa,
+    category: data.category, amount: parseFloat(data.amount),
+    supplier: data.supplier, dueDate: data.due_date, desc: data.description
+  });
+  renderExpenses();
+  updateMetrics();
+  ['eAmount', 'eDesc', 'eSupplier', 'eDueDate'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Delete this expense? This cannot be undone.')) return;
+  const { error } = await sb.from('expenses').delete().eq('id', id);
+  if (error) { alert('Could not delete. Please try again.'); return; }
+  expenses = expenses.filter(e => e.id !== id);
+  renderExpenses();
+  updateMetrics();
+}
+
+function renderExpenses() {
+  const el = document.getElementById('expensesList');
+  if (!expenses.length) {
+    el.innerHTML = '<div class="entry-empty">No expenses logged yet.</div>'; return;
+  }
+  el.innerHTML = expenses.map(e => `
+    <div class="entry-row">
+      <div class="flex-1">
+        <div class="t-main">${e.category} · ${e.villa}</div>
+        <div class="t-sub">${e.desc || '—'}${e.supplier ? ' · ' + e.supplier : ''}${e.dueDate ? ' · Due: ' + fmtDate(e.dueDate) : ''}</div>
+      </div>
+      <span class="badge badge-${e.type}">${e.type === 'gasto' ? 'Gasto' : 'Factura'}</span>
+      <span class="t-neg t-right" style="min-width:80px;">−${fmt(e.amount)}</span>
+      <span class="t-xs t-right" style="min-width:72px;">${fmtDate(e.date)}</span>
+      ${qboTag(e.qboStatus)}
+      <button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INCOME
+// ══════════════════════════════════════════════════════════════
+async function addIncome() {
+  const date     = document.getElementById('iDate').value;
+  const guest    = document.getElementById('iGuest').value.trim();
+  const villa    = document.getElementById('iVilla').value;
+  const amount   = parseFloat(document.getElementById('iAmount').value);
+  const method   = document.getElementById('iMethod').value;
+  const channel  = document.getElementById('iChannel').value;
+  const checkin  = document.getElementById('iCheckin').value;
+  const checkout = document.getElementById('iCheckout').value;
+  const ref      = document.getElementById('iRef').value.trim();
+  const errEl    = document.getElementById('iErr');
+
+  if (!date || !guest || !villa || !amount || amount <= 0 || !method || !channel || !checkout) {
+    errEl.textContent = 'Please fill in all required fields. Checkout date is required.'; return;
+  }
+  errEl.textContent = 'Saving…';
+
+  const { data, error } = await sb.from('income').insert({
+    date, guest, villa, amount, method, channel,
+    checkin:     checkin || null,
+    checkout,
+    booking_ref: ref || null
+  }).select().single();
+
+  if (error) {
+    errEl.textContent = 'Failed to save. Please check your connection and try again.'; return;
+  }
+  errEl.textContent = '';
+
+  income.unshift({
+    id: data.id, date: data.date, guest: data.guest, villa: data.villa,
+    amount: parseFloat(data.amount), method: data.method, channel: data.channel,
+    checkin: data.checkin, checkout: data.checkout,
+    ref: data.booking_ref, checkedOut: data.checked_out,
+    qboStatus: data.qbo_status || null
+  });
+  renderIncome();
+  updateMetrics();
+  ['iGuest', 'iAmount', 'iRef', 'iCheckin', 'iCheckout'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('iMethod').value  = '';
+  document.getElementById('iChannel').value = '';
+}
+
+async function deleteIncome(id) {
+  if (!confirm('Delete this booking? This cannot be undone.')) return;
+  const { error } = await sb.from('income').delete().eq('id', id);
+  if (error) { alert('Could not delete. Please try again.'); return; }
+  income = income.filter(e => e.id !== id);
+  renderIncome();
+  updateMetrics();
+}
+
+function renderIncome() {
+  const el = document.getElementById('incomeList');
+  if (!income.length) {
+    el.innerHTML = '<div class="entry-empty">No bookings logged yet.</div>'; return;
+  }
+  el.innerHTML = income.map(e => `
+    <div class="entry-row">
+      <div class="flex-1">
+        <div class="t-main">${e.guest} · ${e.villa}</div>
+        <div class="t-sub">${e.channel ? '[' + e.channel + '] ' : ''}${e.method} · Check-in: ${fmtDate(e.checkin)} → Checkout: ${fmtDate(e.checkout)}${e.ref ? ' · ' + e.ref : ''}</div>
+      </div>
+      <span class="badge ${e.checkedOut ? 'badge-checked' : 'badge-income'}">${e.checkedOut ? 'Checked Out' : 'Liability'}</span>
+      <span class="t-pos t-right" style="min-width:80px;">+${fmt(e.amount)}</span>
+      <span class="t-xs t-right" style="min-width:72px;">${fmtDate(e.date)}</span>
+      ${qboTag(e.qboStatus)}
+      ${!e.checkedOut
+        ? `<button class="btn btn-sm btn-danger" onclick="deleteIncome('${e.id}')">Delete</button>`
+        : `<div style="width:55px;"></div>`}
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CHECKOUTS
+// ══════════════════════════════════════════════════════════════
+function renderCheckouts() {
+  const el    = document.getElementById('checkoutsList');
+  const today = todayStr();
+  const pending = [...income]
+    .filter(e => !e.checkedOut)
+    .sort((a, b) => a.checkout.localeCompare(b.checkout));
+
+  if (!pending.length) {
+    el.innerHTML = '<div class="entry-empty">No pending checkouts. All guests have been processed.</div>'; return;
+  }
+
+  el.innerHTML = pending.map(e => {
+    const overdue = e.checkout < today;
+    return `
+      <div class="checkout-row${overdue ? ' overdue' : ''}" id="co-${e.id}">
+        <input type="checkbox" class="checkout-check" onchange="processCheckout('${e.id}', this)">
+        <div class="flex-1">
+          <div class="t-main">${e.guest} · ${e.villa}</div>
+          <div class="t-sub">Expected checkout: ${fmtDate(e.checkout)} · ${e.method} · Invoice will be dated ${fmtDate(e.checkout)}</div>
+        </div>
+        ${overdue ? '<span class="overdue-pill">Overdue</span>' : ''}
+        <span class="t-pos" style="font-size:15px;font-weight:800;">${fmt(e.amount)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+async function processCheckout(id, checkbox) {
+  const row = document.getElementById('co-' + id);
+  if (row) row.classList.add('processed');
+
+  const { error } = await sb.from('income').update({
+    checked_out: true,
+    checkout_processed_date: todayStr()
+  }).eq('id', id);
+
+  if (error) {
+    if (row) row.classList.remove('processed');
+    checkbox.checked = false;
+    alert('Could not process checkout. Please check your connection and try again.');
+    return;
+  }
+
+  setTimeout(() => {
+    const entry = income.find(e => e.id === id);
+    if (entry) entry.checkedOut = true;
+    renderCheckouts();
+    renderIncome();
+    updateMetrics();
+  }, 400);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ALL MOVEMENTS
+// ══════════════════════════════════════════════════════════════
+function renderMovements() {
+  const fType   = document.getElementById('fType').value;
+  const fVilla  = document.getElementById('fVilla').value;
+  const fMethod = document.getElementById('fMethod').value;
+  const fFrom   = document.getElementById('fFrom').value;
+  const fTo     = document.getElementById('fTo').value;
+
+  let rows = [];
+
+  expenses.forEach(e => rows.push({
+    _type: 'expense', _subtype: e.type, _date: e.date,
+    _desc: e.category, _villa: e.villa, _amount: -e.amount, _method: ''
+  }));
+  income.filter(e => !e.checkedOut).forEach(e => rows.push({
+    _type: 'income', _subtype: 'income', _date: e.date,
+    _desc: e.guest, _villa: e.villa, _amount: e.amount, _method: e.method
+  }));
+  income.filter(e => e.checkedOut).forEach(e => rows.push({
+    _type: 'checkout', _subtype: 'checkout', _date: e.checkout,
+    _desc: e.guest + ' — Checkout', _villa: e.villa, _amount: e.amount, _method: ''
+  }));
+
+  if (fType   !== 'all') rows = rows.filter(r => r._type === fType);
+  if (fVilla  !== 'all') rows = rows.filter(r => r._villa === fVilla);
+  if (fMethod !== 'all') rows = rows.filter(r => r._method === fMethod);
+  if (fFrom)             rows = rows.filter(r => r._date >= fFrom);
+  if (fTo)               rows = rows.filter(r => r._date <= fTo);
+  rows.sort((a, b) => b._date.localeCompare(a._date));
+
+  const el = document.getElementById('movementsList');
+  if (!rows.length) {
+    el.innerHTML = '<div class="entry-empty">No transactions match your filters.</div>'; return;
+  }
+
+  const badgeFor = r => {
+    if (r._subtype === 'gasto')    return '<span class="badge badge-gasto">Gasto</span>';
+    if (r._subtype === 'factura')  return '<span class="badge badge-factura">Factura</span>';
+    if (r._subtype === 'income')   return '<span class="badge badge-income">Income</span>';
+    if (r._subtype === 'checkout') return '<span class="badge badge-checked">Checkout</span>';
+    return '';
+  };
+
+  el.innerHTML = rows.map(r => `
+    <div class="mov-row">
+      <div>
+        <div class="t-main" style="font-size:12px;">${r._desc}</div>
+      </div>
+      ${badgeFor(r)}
+      <span class="t-xs">${r._villa || '—'}</span>
+      <span class="t-xs">${fmtDate(r._date)}</span>
+      <span class="${r._amount < 0 ? 't-neg' : 't-pos'} t-right">${r._amount < 0 ? '−' : '+'}${fmt(r._amount)}</span>
+      <span class="t-xs">${r._method || '—'}</span>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CASH MOVEMENT
+// ══════════════════════════════════════════════════════════════
+function calcCashBalance() {
+  let bal = 0;
+  income.filter(e => e.method === 'Cash').forEach(e => bal += e.amount);
+  cashManual.forEach(m => { m.type === 'atm' ? bal += m.amount : bal -= m.amount; });
+  return bal;
+}
+
+async function addCashMovement() {
+  const date     = document.getElementById('cDate').value;
+  const amount   = parseFloat(document.getElementById('cAmount').value);
+  const employee = document.getElementById('cEmployee').value.trim();
+  const notes    = document.getElementById('cNotes').value.trim();
+  const errEl    = document.getElementById('cErr');
+
+  if (!date || !amount || amount <= 0) {
+    errEl.textContent = 'Please enter a date and amount.'; return;
+  }
+  if (_cashType === 'salary' && !employee) {
+    errEl.textContent = 'Employee name is required for salary payments.'; return;
+  }
+  errEl.textContent = 'Saving…';
+
+  const { data, error } = await sb.from('cash_manual').insert({
+    date, type: _cashType, amount,
+    employee: employee || null,
+    notes:    notes    || null
+  }).select().single();
+
+  if (error) {
+    errEl.textContent = 'Failed to save. Please check your connection and try again.'; return;
+  }
+  errEl.textContent = '';
+
+  cashManual.unshift({
+    id: data.id, date: data.date, type: data.type,
+    amount: parseFloat(data.amount), employee: data.employee, notes: data.notes,
+    qboStatus: data.qbo_status || null
+  });
+  renderCash();
+  updateMetrics();
+  ['cAmount', 'cEmployee', 'cNotes'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function deleteCashMovement(id) {
+  if (!confirm('Delete this cash movement? This cannot be undone.')) return;
+  const { error } = await sb.from('cash_manual').delete().eq('id', id);
+  if (error) { alert('Could not delete. Please try again.'); return; }
+  cashManual = cashManual.filter(m => m.id !== id);
+  renderCash();
+  updateMetrics();
+}
+
+function renderCash() {
+  let ledger = [];
+
+  income.filter(e => e.method === 'Cash').forEach(e => {
+    ledger.push({
+      id: e.id, date: e.date, type: 'cashin',
+      label: `Guest cash payment — ${e.guest} · ${e.villa}`,
+      amount: e.amount, isManual: false
+    });
+  });
+
+  cashManual.forEach(m => {
+    ledger.push({
+      id: m.id, date: m.date, type: m.type,
+      label: m.type === 'atm'
+        ? `ATM Withdrawal${m.notes ? ' — ' + m.notes : ''}`
+        : `Salary payment — ${m.employee}${m.notes ? ' — ' + m.notes : ''}`,
+      amount: m.amount, isManual: true, qboStatus: m.qboStatus
+    });
+  });
+
+  // Sort ascending to build running balance, then reverse for most-recent-first display
+  ledger.sort((a, b) => a.date.localeCompare(b.date));
+  let running = 0;
+  ledger = ledger.map(entry => {
+    running += entry.type === 'salary' ? -entry.amount : entry.amount;
+    return { ...entry, running };
+  });
+  ledger.reverse();
+
+  const totalIn  = ledger.reduce((s, e) => s + (e.type !== 'salary' ? e.amount : 0), 0);
+  const totalOut = ledger.reduce((s, e) => s + (e.type === 'salary' ? e.amount : 0), 0);
+  const balance  = calcCashBalance();
+
+  const balEl = document.getElementById('cashBalValue');
+  balEl.textContent = fmt(balance);
+  balEl.className   = 'cash-bal-value' + (balance < 0 ? ' negative' : '');
+  document.getElementById('cashTotalIn').textContent  = fmt(totalIn);
+  document.getElementById('cashTotalOut').textContent = fmt(totalOut);
+
+  const listEl = document.getElementById('cashList');
+  if (!ledger.length) {
+    listEl.innerHTML = '<div class="entry-empty">No cash movements yet. Guest cash payments will appear here automatically.</div>';
+    return;
+  }
+
+  const badgeFor = type => {
+    if (type === 'cashin') return '<span class="badge badge-cashin">Cash In</span>';
+    if (type === 'atm')    return '<span class="badge badge-atm">ATM</span>';
+    return                        '<span class="badge badge-salary">Salary</span>';
+  };
+
+  listEl.innerHTML = ledger.map(e => `
+    <div class="cash-row">
+      <span class="t-xs">${fmtDate(e.date)}</span>
+      <div>
+        <div class="t-main" style="font-size:12px;">${e.label}</div>
+        ${e.isManual ? qboTag(e.qboStatus) : ''}
+      </div>
+      ${badgeFor(e.type)}
+      <span class="${e.type === 'salary' ? 't-neg' : 't-pos'} t-right">
+        ${e.type === 'salary' ? '−' : '+'}${fmt(e.amount)}
+      </span>
+      <span class="running-bal ${e.running >= 0 ? 'pos' : 'neg'}">${fmt(e.running)}</span>
+      ${e.isManual
+        ? `<button class="btn btn-sm btn-danger" onclick="deleteCashMovement('${e.id}')">Del</button>`
+        : `<div></div>`}
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  GLOBAL EXPORTS
+//  Module scripts are scoped — functions called from HTML
+//  onclick/onchange attributes must be exposed on window.
+// ══════════════════════════════════════════════════════════════
+Object.assign(window, {
+  switchTab, setExpenseType, setCashType,
+  addExpense, deleteExpense,
+  addIncome, deleteIncome,
+  processCheckout,
+  addCashMovement, deleteCashMovement,
+  renderMovements
+});
+</script>
+</body>
+</html>
