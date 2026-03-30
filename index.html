@@ -15,6 +15,10 @@
   .header p { font-size: 12px; color: #718096; margin-top: 3px; }
   .header-date { font-size: 11px; color: #4a5568; padding-top: 4px; white-space: nowrap; }
 
+  .year-nav { display: flex; align-items: center; gap: 8px; margin-top: 16px; margin-bottom: -4px; }
+  .year-nav button { background: none; border: 1px solid #2d3748; color: #718096; border-radius: 6px; padding: 2px 9px; cursor: pointer; font-size: 13px; line-height: 1.6; }
+  .year-nav button:hover { color: #e2e8f0; border-color: #4a5568; }
+  .year-nav span { font-size: 12px; font-weight: 700; color: #a0aec0; min-width: 36px; text-align: center; letter-spacing: 0.5px; }
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 20px; }
   .metric { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 14px 18px; }
   .metric-label { font-size: 10px; color: #718096; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -82,6 +86,7 @@
   .badge-checked  { background: rgba(99,179,237,0.15);  color: #63b3ed; }
   .badge-atm      { background: rgba(72,187,120,0.15);  color: #48bb78; }
   .badge-salary   { background: rgba(245,101,101,0.15); color: #f56565; }
+  .badge-provider { background: rgba(159,122,234,0.15); color: #9f7aea; }
   .badge-cashin   { background: rgba(72,187,120,0.15);  color: #48bb78; }
   .badge-pending  { background: rgba(160,174,192,0.1);  color: #a0aec0; }
   .badge-synced   { background: rgba(72,187,120,0.2);   color: #48bb78; }
@@ -152,20 +157,169 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── Tablet (≤ 800px) ── */
   @media (max-width: 800px) {
     .header, .content { padding: 16px; }
     .tabs { padding: 10px 16px; }
     .metrics { grid-template-columns: 1fr 1fr; }
     .form-grid { grid-template-columns: 1fr 1fr; }
     .mov-row { grid-template-columns: 1fr 70px 80px 70px; }
-    .mov-row > :nth-child(3),
-    .mov-row > :nth-child(6) { display: none; }
+    .mov-row > :nth-child(3), .mov-row > :nth-child(6) { display: none; }
     .cash-row { grid-template-columns: 80px 1fr 70px 80px 40px; }
     .cash-row > :nth-child(3) { display: none; }
   }
+
+  /* ── Phone (≤ 480px) ── */
+  @media (max-width: 480px) {
+    /* Header */
+    .header { padding: 14px 14px 16px; }
+    .header h1 { font-size: 16px; }
+    .header p { display: none; }
+    .header-date { display: none; }
+    .header-top { flex-wrap: wrap; gap: 8px; }
+
+    /* Metrics */
+    .metrics { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .metric { padding: 10px 12px; }
+    .metric-value { font-size: 17px; }
+    .metric-label { font-size: 9px; }
+
+    /* Forms */
+    .content { padding: 12px 14px; }
+    .form-card { padding: 14px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-group.full { grid-column: 1; }
+
+    /* Entry rows — wrap so amount + badges drop below description */
+    .entry-row { flex-wrap: wrap; padding: 11px 12px; }
+    .entry-row .t-xs { display: none; }          /* hide date — visible in subtitle */
+    .entry-row .flex-1 { width: 100%; }           /* description always full-width */
+
+    /* Cash balance box */
+    .cash-balance-box { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 16px; }
+    .cash-bal-stats { text-align: left; }
+    .cash-bal-value { font-size: 28px; }
+
+    /* All movements table — keep date + amount + type only */
+    .mov-row { grid-template-columns: 1fr 80px 70px; padding: 10px 12px; }
+    .mov-row > :nth-child(3), .mov-row > :nth-child(4),
+    .mov-row > :nth-child(5), .mov-row > :nth-child(6) { display: none; }
+
+    /* Cash ledger — hide running balance column */
+    .cash-row { grid-template-columns: 72px 1fr 68px 68px; padding: 10px 12px; }
+    .cash-row > :nth-child(3), .cash-row > :nth-child(5) { display: none; }
+
+    /* Checkout rows */
+    .checkout-row { flex-wrap: wrap; gap: 8px; padding: 12px 12px; }
+
+    /* Toast — full-width on phone */
+    .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+
+    /* Tabs — smaller padding */
+    .tabs { padding: 8px 12px; gap: 3px; }
+    .tab { padding: 7px 12px; font-size: 12px; }
+  }
+
+  /* ── Login overlay ── */
+  #loginOverlay {
+    position: fixed; inset: 0; background: #0f1117; z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    background: #1a1f2e; border: 1px solid #2d3748; border-radius: 16px;
+    padding: 40px 36px; width: 100%; max-width: 360px;
+    margin: 0 16px;
+  }
+  .login-card h2 { font-size: 18px; font-weight: 700; color: #f7fafc; margin-bottom: 4px; }
+  .login-card .login-sub { font-size: 12px; color: #718096; margin-bottom: 28px; }
+  .login-card .form-group { margin-bottom: 14px; }
+  .login-card .form-group:last-of-type { margin-bottom: 20px; }
+  .login-card .form-group input { width: 100%; }
+  .login-error { color: #f56565; font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+  /* ── QBO status pill ── */
+  .qbo-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; white-space: nowrap; transition: all 0.2s;
+  }
+  .qbo-pill.connected   { color: #48bb78; background: rgba(72,187,120,0.1);  border: 1px solid rgba(72,187,120,0.3); }
+  .qbo-pill.warning     { color: #ed8936; background: rgba(237,137,54,0.1);  border: 1px solid rgba(237,137,54,0.3); }
+  .qbo-pill.disconnected{ color: #f56565; background: rgba(245,101,101,0.1); border: 1px solid rgba(245,101,101,0.3); }
+  .qbo-pill.checking    { color: #718096; background: rgba(113,128,150,0.1); border: 1px solid rgba(113,128,150,0.2); }
+
+  /* ── Toast notifications ── */
+  .toast { position: fixed; bottom: 28px; right: 28px; padding: 13px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 9999; max-width: 340px; line-height: 1.5; animation: toastIn 0.2s ease; cursor: pointer; }
+  .toast-error   { background: #2a1515; border: 1px solid rgba(245,101,101,0.5); color: #fc8181; }
+  .toast-success { background: #152a1a; border: 1px solid rgba(72,187,120,0.5);  color: #68d391; }
+  @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ── Contact Drawer ── */
+  .contact-drawer {
+    position: fixed; top: 0; right: -320px; width: 290px; height: 100vh;
+    background: #1a1f2e; border-left: 1px solid #2d3748;
+    z-index: 400; transition: right 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto; box-shadow: -6px 0 28px rgba(0,0,0,0.5);
+  }
+  .contact-drawer.open { right: 0; }
+  .contact-drawer-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 18px 20px 14px; border-bottom: 1px solid #2d3748;
+    position: sticky; top: 0; background: #1a1f2e; z-index: 1;
+  }
+  .contact-drawer-header-inner { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; }
+  .contact-drawer-title { font-size: 13px; font-weight: 700; color: #f7fafc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .contact-drawer-close {
+    background: none; border: none; color: #718096; cursor: pointer;
+    font-size: 18px; line-height: 1; padding: 0 0 0 10px; flex-shrink: 0;
+    transition: color 0.15s; margin-top: 1px;
+  }
+  .contact-drawer-close:hover { color: #f7fafc; }
+  .contact-drawer-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 13px; }
+  .contact-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; width: fit-content; }
+  .contact-tag-new      { background: rgba(99,179,237,0.15); color: #63b3ed; }
+  .contact-tag-existing { background: rgba(72,187,120,0.15); color: #48bb78; }
+  .contact-save-row { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+  .contact-saved-msg { font-size: 11px; }
 </style>
 </head>
 <body>
+
+<!-- Set-password overlay — shown after accepting an invite or clicking "forgot password" -->
+<div id="setPasswordOverlay" style="display:none;">
+  <div class="login-card">
+    <h2 id="setPasswordTitle">Set your password</h2>
+    <p class="login-sub" id="setPasswordSub">Choose a password to activate your account.</p>
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" id="newPassword" placeholder="Min. 8 characters" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Repeat password" autocomplete="new-password">
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="setNewPassword()">Save Password &amp; Sign In</button>
+    <div class="login-error" id="setPasswordError"></div>
+  </div>
+</div>
+
+<!-- Login overlay — shown when there is no authenticated session -->
+<div id="loginOverlay" style="display:none;">
+  <div class="login-card">
+    <h2>Villas Reina</h2>
+    <p class="login-sub">Gestión Hotelera Lanzarote S.L.</p>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="signIn()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
 
 <!-- Loading overlay — shown while data fetches on page open -->
 <div id="loadingOverlay">
@@ -180,7 +334,16 @@
       <h1>Villas Reina — Financial Dashboard</h1>
       <p>Gestión Hotelera Lanzarote S.L. · Data entry &amp; QuickBooks sync</p>
     </div>
-    <div class="header-date" id="headerDate"></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="header-date" id="headerDate"></div>
+      <div id="qboPill" class="qbo-pill checking" style="display:none;">QBO: …</div>
+      <button class="btn btn-sm" id="signOutBtn" style="display:none;background:#1a1f2e;color:#718096;border:1px solid #2d3748;" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+  <div class="year-nav">
+    <button onclick="changeYear(-1)">‹</button>
+    <span id="yearDisplay">2026</span>
+    <button onclick="changeYear(1)">›</button>
   </div>
   <div class="metrics">
     <div class="metric">
@@ -200,6 +363,7 @@
       <div class="metric-value blue" id="mCash">€0.00</div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════ TABS ══════════════════════════ -->
@@ -209,6 +373,7 @@
   <div class="tab"         onclick="switchTab('checkouts', this)" id="tabCheckouts">Checkouts</div>
   <div class="tab"         onclick="switchTab('movements', this)">All Movements</div>
   <div class="tab"         onclick="switchTab('cash',      this)">Cash Movement</div>
+  <div class="tab"         onclick="switchTab('analytics', this)">Analytics</div>
 </div>
 
 <!-- ══════════════════════════ CONTENT ══════════════════════════ -->
@@ -240,23 +405,72 @@
           <label>Category *</label>
           <select id="eCategory">
             <option value="">Select category…</option>
-            <option>Maintenance</option>
-            <option>Cleaning</option>
-            <option>Utilities</option>
-            <option>Supplies</option>
-            <option>Insurance</option>
-            <option>Salaries</option>
-            <option>Marketing</option>
-            <option>Other</option>
+            <optgroup label="Personal">
+              <option value="SSueldos y salarios">Sueldos y salarios</option>
+              <option value="TGSS – Autónomos">TGSS – Autónomos</option>
+              <option value="TGSS – Régimen General">TGSS – Régimen General</option>
+            </optgroup>
+            <optgroup label="Honorarios">
+              <option value="Asesoría contable">Asesoría contable</option>
+              <option value="Asesoría Laboral">Asesoría Laboral</option>
+            </optgroup>
+            <optgroup label="Seguros">
+              <option value="Seguros (Hogar/RC/Vehículos)">Hogar / RC</option>
+              <option value="Seguro Vehiculos">Vehículos</option>
+            </optgroup>
+            <optgroup label="Suministros">
+              <option value="Agua">Agua</option>
+              <option value="Luz">Luz</option>
+              <option value="Internet">Internet</option>
+              <option value="Prosegur Alarmas">Prosegur Alarmas</option>
+              <option value="Impuesto electricidad">Impuesto electricidad</option>
+            </optgroup>
+            <optgroup label="Alquiler / Hipoteca">
+              <option value="Alquiler/Hipoteca vinculada a la actividad">Alquiler / Hipoteca</option>
+            </optgroup>
+            <optgroup label="Licencias y tributos">
+              <option value="Licencias, tasas y tributos municipales">Licencias y tributos municipales</option>
+            </optgroup>
+            <optgroup label="Gastos bancarios">
+              <option value="CaixaBank - Mantenimiento">CaixaBank – Mantenimiento</option>
+              <option value="Gastos Cuenta Crédito CaixaBank">Cuenta Crédito CaixaBank</option>
+              <option value="Gastos Cuenta Revolut">Cuenta Revolut</option>
+            </optgroup>
+            <optgroup label="Compras y Operativos">
+              <option value="Articulos de limpieza">Artículos de limpieza</option>
+              <option value="Suministros y materiales">Suministros y materiales</option>
+              <option value="Combustible/Desplazamientos operativos">Combustible / Desplazamientos</option>
+              <option value="Compras, equipamiento y aprovisionamiento">Compras y equipamiento</option>
+              <option value="Ropa de cama y baño">Ropa de cama y baño</option>
+              <option value="Productos de piscina">Productos de piscina</option>
+              <option value="Mobiliario &amp; decoración &lt;200eur">Mobiliario y decoración</option>
+            </optgroup>
+            <optgroup label="Tasas y comisiones">
+              <option value="Airbnb Host Fee">Airbnb Host Fee</option>
+              <option value="Comisiones de TPV">Comisiones de TPV</option>
+              <option value="STRIPE Processing Fee">STRIPE Processing Fee</option>
+              <option value="Comision de Booking.com">Booking.com</option>
+              <option value="Climate Contribution">Climate Contribution</option>
+            </optgroup>
+            <optgroup label="Servicios profesionales">
+              <option value="Asesoramiento Estratégico">Asesoramiento Estratégico</option>
+              <option value="Reparaciones y mantenimiento">Reparaciones y mantenimiento</option>
+              <option value="Limpieza y Lavanderia">Limpieza y Lavandería</option>
+              <option value="Jardineria">Jardinería</option>
+            </optgroup>
+            <optgroup label="Otros">
+              <option value="Otros gastos generales y administrativos">Otros gastos generales</option>
+              <option value="Gastos de comunidad">Gastos de comunidad</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
           <label>Amount (€) *</label>
           <input type="number" id="eAmount" placeholder="0.00" step="0.01" min="0">
         </div>
-        <div class="form-group factura-field hidden">
-          <label>Supplier *</label>
-          <input type="text" id="eSupplier" placeholder="Supplier name…">
+        <div class="form-group">
+          <label id="eSupplierLabel">Supplier *</label>
+          <input type="text" id="eSupplier" placeholder="Supplier name…" list="vendorList" autocomplete="off">
         </div>
         <div class="form-group factura-field hidden">
           <label>Due Date</label>
@@ -290,7 +504,7 @@
         </div>
         <div class="form-group">
           <label>Guest Name *</label>
-          <input type="text" id="iGuest" placeholder="Guest name…">
+          <input type="text" id="iGuest" placeholder="Guest name…" list="customerList" autocomplete="off">
         </div>
         <div class="form-group">
           <label>Villa *</label>
@@ -307,7 +521,7 @@
         </div>
         <div class="form-group">
           <label>Payment Method *</label>
-          <select id="iMethod">
+          <select id="iMethod" onchange="toggleBankAccount()">
             <option value="">Select method…</option>
             <option>Stripe</option>
             <option>Bank Transfer</option>
@@ -324,6 +538,15 @@
             <option>Direct</option>
           </select>
         </div>
+        <div class="form-group" id="iBankAccountGroup">
+          <label>Bank Account *</label>
+          <select id="iBankAccount">
+            <option value="">Select account…</option>
+            <option value="Caixabank">Caixabank</option>
+            <option value="Revolut-booking.com">Revolut – Booking.com</option>
+            <option value="Revolut-main">Revolut – Main</option>
+          </select>
+        </div>
         <div class="form-group">
           <label>Check-in Date</label>
           <input type="date" id="iCheckin">
@@ -338,7 +561,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-green" onclick="addIncome()">Log Booking &amp; Create Liability Invoice</button>
+        <button class="btn btn-green" onclick="addIncome()">Log Booking &amp; Create Bank Deposit</button>
         <span class="form-error" id="iErr"></span>
       </div>
     </div>
@@ -432,7 +655,8 @@
       <div class="section-title">Record Manual Cash Movement</div>
       <div class="type-toggle" id="cashTypeToggle">
         <button class="type-btn active" onclick="setCashType('atm')">ATM Withdrawal (Cash In)</button>
-        <button class="type-btn"        onclick="setCashType('salary')">Salary Payment (Cash Out)</button>
+        <button class="type-btn"        onclick="setCashType('salary')">Salary Payment</button>
+        <button class="type-btn"        onclick="setCashType('provider')">Provider Payment</button>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -447,9 +671,59 @@
           <label>Employee *</label>
           <input type="text" id="cEmployee" placeholder="Employee name…">
         </div>
+        <div class="form-group provider-field hidden">
+          <label>Supplier *</label>
+          <input type="text" id="cSupplier" placeholder="Supplier name…" list="vendorList" autocomplete="off">
+        </div>
+        <div class="form-group provider-field hidden">
+          <label>Category *</label>
+          <select id="cProviderCategory">
+            <option value="">Select category…</option>
+            <optgroup label="Honorarios">
+              <option value="Asesoría contable">Asesoría contable</option>
+              <option value="Asesoría Laboral">Asesoría Laboral</option>
+            </optgroup>
+            <optgroup label="Seguros">
+              <option value="Seguros (Hogar/RC/Vehículos)">Hogar / RC</option>
+              <option value="Seguro Vehiculos">Vehículos</option>
+            </optgroup>
+            <optgroup label="Suministros">
+              <option value="Agua">Agua</option>
+              <option value="Luz">Luz</option>
+              <option value="Internet">Internet</option>
+              <option value="Prosegur Alarmas">Prosegur Alarmas</option>
+              <option value="Impuesto electricidad">Impuesto electricidad</option>
+            </optgroup>
+            <optgroup label="Alquiler / Hipoteca">
+              <option value="Alquiler/Hipoteca vinculada a la actividad">Alquiler / Hipoteca</option>
+            </optgroup>
+            <optgroup label="Licencias y tributos">
+              <option value="Licencias, tasas y tributos municipales">Licencias y tributos municipales</option>
+            </optgroup>
+            <optgroup label="Compras y Operativos">
+              <option value="Articulos de limpieza">Artículos de limpieza</option>
+              <option value="Suministros y materiales">Suministros y materiales</option>
+              <option value="Combustible/Desplazamientos operativos">Combustible / Desplazamientos</option>
+              <option value="Compras, equipamiento y aprovisionamiento">Compras y equipamiento</option>
+              <option value="Ropa de cama y baño">Ropa de cama y baño</option>
+              <option value="Productos de piscina">Productos de piscina</option>
+              <option value="Mobiliario &amp; decoración &lt;200eur">Mobiliario y decoración</option>
+            </optgroup>
+            <optgroup label="Servicios profesionales">
+              <option value="Asesoramiento Estratégico">Asesoramiento Estratégico</option>
+              <option value="Reparaciones y mantenimiento">Reparaciones y mantenimiento</option>
+              <option value="Limpieza y Lavanderia">Limpieza y Lavandería</option>
+              <option value="Jardineria">Jardinería</option>
+            </optgroup>
+            <optgroup label="Otros">
+              <option value="Otros gastos generales y administrativos">Otros gastos generales</option>
+              <option value="Gastos de comunidad">Gastos de comunidad</option>
+            </optgroup>
+          </select>
+        </div>
         <div class="form-group">
           <label>Notes (optional)</label>
-          <input type="text" id="cNotes" placeholder="e.g. March salary, ATM Caixabank…">
+          <input type="text" id="cNotes" placeholder="e.g. March salary, ATM Caixabank, plumber visit…">
         </div>
       </div>
       <div class="form-actions">
@@ -472,8 +746,18 @@
     </div>
 
   </div>
+
+  <!-- ─── TAB: ANALYTICS ─── -->
+  <div id="panel-analytics" class="panel">
+    <div class="form-card">
+      <div class="section-title">Monthly Overview — <span id="chartYearLabel">2026</span></div>
+      <canvas id="monthlyChart" height="100"></canvas>
+    </div>
+  </div>
+
 </div><!-- /content -->
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script type="module">
 // ══════════════════════════════════════════════════════════════
 //  SUPABASE — cloud database connection
@@ -489,11 +773,13 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ══════════════════════════════════════════════════════════════
 //  STATE — local copies of database data (populated on load)
 // ══════════════════════════════════════════════════════════════
-let expenses   = [];
-let income     = [];
-let cashManual = [];
-let _expType   = 'gasto';
-let _cashType  = 'atm';
+let expenses     = [];
+let income       = [];
+let cashManual   = [];
+let _expType     = 'gasto';
+let _cashType    = 'atm';
+let canDelete    = false;   // true only for users with role = 'admin' in Supabase user_metadata
+let selectedYear = new Date().getFullYear();
 
 // ══════════════════════════════════════════════════════════════
 //  INIT — runs when the page opens
@@ -501,13 +787,53 @@ let _cashType  = 'atm';
 document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('headerDate').textContent =
     new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Handle invite / password-recovery links — Supabase redirects to SITE_URL#type=invite&access_token=...
+  // The client auto-parses the hash, so getSession() returns the temp session immediately.
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  const authType   = hashParams.get('type');
+  if (authType === 'invite' || authType === 'recovery') {
+    history.replaceState(null, '', window.location.pathname); // strip tokens from address bar
+    document.getElementById('loadingOverlay').style.display = 'none';
+    if (authType === 'recovery') {
+      document.getElementById('setPasswordTitle').textContent = 'Reset your password';
+      document.getElementById('setPasswordSub').textContent  = 'Enter a new password for your account.';
+    }
+    document.getElementById('setPasswordOverlay').style.display = 'flex';
+    return;
+  }
+
+  // Block access until authenticated
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'flex';
+    return;
+  }
+  canDelete = session.user.user_metadata?.role === 'admin';
+  document.getElementById('signOutBtn').style.display = '';
+
   const today = todayStr();
   ['eDate', 'iDate', 'cDate'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = today;
   });
+
+  // Contact drawer — listen for name input on all supplier/guest fields
+  ['eSupplier', 'iGuest', 'cEmployee', 'cSupplier'].forEach(fieldId => {
+    const el = document.getElementById(fieldId);
+    if (el) el.addEventListener('input', e => triggerContactLookup(e.target.value));
+  });
+
   await loadAllData();
   startQBORealtime();
+  checkQBOStatus();
+  loadQBOLists();
+});
+
+// Allow Enter key to submit the login form
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginOverlay').style.display !== 'none') signIn();
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -534,11 +860,13 @@ async function loadAllData() {
   );
 
   try {
+    const yearStart = `${selectedYear}-01-01`;
+    const yearEnd   = `${selectedYear}-12-31`;
     const [expRes, incRes, cashRes] = await Promise.race([
       Promise.all([
-        sb.from('expenses').select('*').order('created_at', { ascending: false }),
-        sb.from('income').select('*').order('created_at', { ascending: false }),
-        sb.from('cash_manual').select('*').order('created_at', { ascending: false })
+        sb.from('expenses').select('*').is('deleted_at', null).gte('date', yearStart).lte('date', yearEnd).order('created_at', { ascending: false }),
+        sb.from('income').select('*').is('deleted_at', null).gte('date', yearStart).lte('date', yearEnd).order('created_at', { ascending: false }),
+        sb.from('cash_manual').select('*').is('deleted_at', null).order('created_at', { ascending: false })  // cash always loads all-time for accurate balance
       ]),
       timeout.then(() => { throw new Error('Timed out'); })
     ]);
@@ -554,21 +882,23 @@ async function loadAllData() {
       id: r.id, date: r.date, type: r.type, villa: r.villa,
       category: r.category, amount: parseFloat(r.amount),
       supplier: r.supplier, dueDate: r.due_date, desc: r.description,
-      qboStatus: r.qbo_status || null
+      qboStatus: r.qbo_status || null, qboTxId: r.qbo_tx_id || null,
+      paidAt: r.paid_at || null
     }));
 
     income = (incRes.data || []).map(r => ({
       id: r.id, date: r.date, guest: r.guest, villa: r.villa,
       amount: parseFloat(r.amount), method: r.method, channel: r.channel,
-      checkin: r.checkin, checkout: r.checkout,
+      bankAccount: r.bank_account, checkin: r.checkin, checkout: r.checkout,
       ref: r.booking_ref, checkedOut: r.checked_out,
       qboStatus: r.qbo_status || null
     }));
 
     cashManual = (cashRes.data || []).map(r => ({
       id: r.id, date: r.date, type: r.type,
-      amount: parseFloat(r.amount), employee: r.employee, notes: r.notes,
-      qboStatus: r.qbo_status || null
+      amount: parseFloat(r.amount), employee: r.employee,
+      supplier: r.supplier, category: r.category,
+      notes: r.notes, qboStatus: r.qbo_status || null
     }));
 
     overlay.style.display = 'none';
@@ -588,33 +918,81 @@ function startQBORealtime() {
   sb.channel('qbo-status')
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'expenses' }, ({ new: rec }) => {
       const entry = expenses.find(e => e.id === rec.id);
-      if (entry) { entry.qboStatus = rec.qbo_status; renderExpenses(); }
+      if (entry) {
+        entry.qboStatus = rec.qbo_status;
+        if (rec.qbo_status === 'error') showToast(`QBO sync failed — ${entry.category} · ${entry.villa}. Tap ↻ to retry.`);
+        renderExpenses();
+      }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'income' }, ({ new: rec }) => {
       const entry = income.find(e => e.id === rec.id);
-      if (entry) { entry.qboStatus = rec.qbo_status; renderIncome(); }
+      if (entry) {
+        entry.qboStatus = rec.qbo_status;
+        if (rec.qbo_status === 'error') showToast(`QBO sync failed — ${entry.guest} · ${entry.villa}. Tap ↻ to retry.`);
+        renderIncome();
+      }
     })
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'cash_manual' }, ({ new: rec }) => {
       const entry = cashManual.find(e => e.id === rec.id);
-      if (entry) { entry.qboStatus = rec.qbo_status; renderCash(); }
+      if (entry) {
+        entry.qboStatus = rec.qbo_status;
+        if (rec.qbo_status === 'error') showToast(`QBO sync failed — cash movement on ${entry.date}. Tap ↻ to retry.`);
+        renderCash();
+      }
     })
     .subscribe();
+}
+
+function showToast(msg, type = 'error') {
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  t.onclick = () => t.remove();
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 7000);
 }
 
 // ══════════════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════════════
 
-// Returns the correct QBO status badge based on qbo_status field value
-function qboTag(status) {
+// Returns the correct QBO status badge. Includes a ↻ retry button on error rows.
+function qboTag(status, table, id) {
   if (status === 'synced') return '<span class="badge badge-synced" style="min-width:55px;">QBO: ✓</span>';
-  if (status === 'error')  return '<span class="badge badge-error"  style="min-width:55px;">QBO: !</span>';
+  if (status === 'error')  return `<span class="badge badge-error" style="min-width:55px;">QBO: !</span><button class="btn btn-sm" onclick="retryQBOSync('${table}','${id}')" title="Retry QBO sync" style="padding:2px 7px;font-size:12px;margin-left:4px;">↻</button>`;
   return '<span class="badge badge-pending" style="min-width:55px;">QBO: —</span>';
+}
+
+async function retryQBOSync(table, id) {
+  const res = await fetch('https://lcewyjghjemhmgqqaqab.supabase.co/functions/v1/qbo-retry', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ table, id }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert('Retry failed: ' + (data.error || 'Unknown error'));
+  }
+  // Realtime subscription will update the badge automatically when qbo_status changes
 }
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
+
+// Escapes user-supplied strings before injecting into innerHTML templates
+function escHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Guards against double-firing processCheckout for the same booking
+const _checkoutsInProgress = new Set();
 
 function fmt(n) {
   return '€' + Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -634,9 +1012,11 @@ function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   el.classList.add('active');
+  closeContactDrawer();
   if (name === 'checkouts') renderCheckouts();
   if (name === 'movements') renderMovements();
   if (name === 'cash')      renderCash();
+  if (name === 'analytics') renderMonthlyChart();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -648,6 +1028,7 @@ function setExpenseType(t) {
   btns[0].classList.toggle('active', t === 'gasto');
   btns[1].classList.toggle('active', t === 'factura');
   document.querySelectorAll('.factura-field').forEach(el => el.classList.toggle('hidden', t !== 'factura'));
+  document.getElementById('eSupplierLabel').textContent = 'Supplier *';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -658,7 +1039,65 @@ function setCashType(t) {
   const btns = document.querySelectorAll('#cashTypeToggle .type-btn');
   btns[0].classList.toggle('active', t === 'atm');
   btns[1].classList.toggle('active', t === 'salary');
+  btns[2].classList.toggle('active', t === 'provider');
   document.querySelectorAll('.salary-field').forEach(el => el.classList.toggle('hidden', t !== 'salary'));
+  document.querySelectorAll('.provider-field').forEach(el => el.classList.toggle('hidden', t !== 'provider'));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MONTHLY CHART
+// ══════════════════════════════════════════════════════════════
+let _monthlyChart = null;
+
+function renderMonthlyChart() {
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('chartYearLabel').textContent = selectedYear;
+
+  const incByMonth  = Array(12).fill(0);
+  const expByMonth  = Array(12).fill(0);
+  income.forEach(e => {
+    const m = parseInt(e.date.split('-')[1], 10) - 1;
+    if (m >= 0 && m < 12) incByMonth[m] += e.amount;
+  });
+  expenses.forEach(e => {
+    const m = parseInt(e.date.split('-')[1], 10) - 1;
+    if (m >= 0 && m < 12) expByMonth[m] += e.amount;
+  });
+
+  const ctx = document.getElementById('monthlyChart').getContext('2d');
+  if (_monthlyChart) _monthlyChart.destroy();
+  _monthlyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        { label: 'Income',   data: incByMonth, backgroundColor: 'rgba(72,187,120,0.7)',  borderRadius: 4 },
+        { label: 'Expenses', data: expByMonth, backgroundColor: 'rgba(245,101,101,0.7)', borderRadius: 4 },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: '#a0aec0', font: { size: 11 }, boxWidth: 12 } },
+        tooltip: {
+          callbacks: { label: ctx => ` €${ctx.parsed.y.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}` }
+        },
+      },
+      scales: {
+        x: { ticks: { color: '#718096', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { ticks: { color: '#718096', font: { size: 10 }, callback: v => '€' + v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      },
+    },
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  YEAR NAVIGATION
+// ══════════════════════════════════════════════════════════════
+async function changeYear(delta) {
+  selectedYear += delta;
+  document.getElementById('yearDisplay').textContent = selectedYear;
+  await loadAllData();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -677,6 +1116,8 @@ function updateMetrics() {
   const cashEl = document.getElementById('mCash');
   cashEl.textContent = fmt(cashBal);
   cashEl.className   = 'metric-value ' + (cashBal < 0 ? 'red' : 'blue');
+
+  if (document.getElementById('panel-analytics')?.classList.contains('active')) renderMonthlyChart();
 
   // Checkout tab badge — shows count of overdue checkouts
   const overdue = income.filter(e => !e.checkedOut && e.checkout < todayStr()).length;
@@ -704,11 +1145,8 @@ async function addExpense() {
   const dueDate  = document.getElementById('eDueDate').value;
   const errEl    = document.getElementById('eErr');
 
-  if (!date || !villa || !category || !amount || amount <= 0) {
+  if (!date || !villa || !category || !amount || amount <= 0 || !supplier) {
     errEl.textContent = 'Please fill in all required fields.'; return;
-  }
-  if (_expType === 'factura' && !supplier) {
-    errEl.textContent = 'Supplier is required for a Factura.'; return;
   }
   errEl.textContent = 'Saving…';
 
@@ -727,16 +1165,33 @@ async function addExpense() {
   expenses.unshift({
     id: data.id, date: data.date, type: data.type, villa: data.villa,
     category: data.category, amount: parseFloat(data.amount),
-    supplier: data.supplier, dueDate: data.due_date, desc: data.description
+    supplier: data.supplier, dueDate: data.due_date, desc: data.description,
+    qboStatus: null, qboTxId: null, paidAt: null
   });
   renderExpenses();
   updateMetrics();
+  showToast(`${data.type === 'gasto' ? 'Gasto' : 'Factura'} saved — ${data.category} · ${fmt(parseFloat(data.amount))}`, 'success');
   ['eAmount', 'eDesc', 'eSupplier', 'eDueDate'].forEach(id => document.getElementById(id).value = '');
 }
 
+async function markBillPaid(id) {
+  if (!confirm('Mark this bill as paid? This will create a BillPayment in QuickBooks.')) return;
+  const res = await fetch('https://lcewyjghjemhmgqqaqab.supabase.co/functions/v1/qbo-bill-pay', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ id }),
+  });
+  const data = await res.json();
+  if (!res.ok) { alert('Failed: ' + (data.error || 'Unknown error')); return; }
+  const entry = expenses.find(e => e.id === id);
+  if (entry) entry.paidAt = new Date().toISOString();
+  renderExpenses();
+  showToast('Bill marked as paid in QuickBooks ✓', 'success');
+}
+
 async function deleteExpense(id) {
-  if (!confirm('Delete this expense? This cannot be undone.')) return;
-  const { error } = await sb.from('expenses').delete().eq('id', id);
+  if (!confirm('Delete this expense?')) return;
+  const { error } = await sb.from('expenses').update({ deleted_at: new Date().toISOString() }).eq('id', id);
   if (error) { alert('Could not delete. Please try again.'); return; }
   expenses = expenses.filter(e => e.id !== id);
   renderExpenses();
@@ -751,14 +1206,17 @@ function renderExpenses() {
   el.innerHTML = expenses.map(e => `
     <div class="entry-row">
       <div class="flex-1">
-        <div class="t-main">${e.category} · ${e.villa}</div>
-        <div class="t-sub">${e.desc || '—'}${e.supplier ? ' · ' + e.supplier : ''}${e.dueDate ? ' · Due: ' + fmtDate(e.dueDate) : ''}</div>
+        <div class="t-main">${escHtml(e.category)} · ${escHtml(e.villa)}${e.paidAt ? ' <span style="font-size:10px;color:#68d391;font-weight:600;">PAID</span>' : ''}</div>
+        <div class="t-sub">${escHtml(e.desc) || '—'}${e.supplier ? ' · ' + escHtml(e.supplier) : ''}${e.dueDate ? ' · Due: ' + fmtDate(e.dueDate) : ''}</div>
       </div>
       <span class="badge badge-${e.type}">${e.type === 'gasto' ? 'Gasto' : 'Factura'}</span>
       <span class="t-neg t-right" style="min-width:80px;">−${fmt(e.amount)}</span>
       <span class="t-xs t-right" style="min-width:72px;">${fmtDate(e.date)}</span>
-      ${qboTag(e.qboStatus)}
-      <button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
+      ${qboTag(e.qboStatus, 'expenses', e.id)}
+      ${e.type === 'factura' && e.qboStatus === 'synced' && !e.paidAt
+        ? `<button class="btn btn-sm" onclick="markBillPaid('${e.id}')" style="background:rgba(72,187,120,0.1);color:#68d391;border:1px solid rgba(72,187,120,0.3);white-space:nowrap;">Mark Paid</button>`
+        : e.paidAt ? '<div style="min-width:80px;"></div>'
+        : canDelete ? `<button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>` : '<div style="width:55px;"></div>'}
     </div>
   `).join('');
 }
@@ -766,28 +1224,44 @@ function renderExpenses() {
 // ══════════════════════════════════════════════════════════════
 //  INCOME
 // ══════════════════════════════════════════════════════════════
+function toggleBankAccount() {
+  const method = document.getElementById('iMethod').value;
+  const group  = document.getElementById('iBankAccountGroup');
+  if (method === 'Cash') {
+    group.style.display = 'none';
+    document.getElementById('iBankAccount').value = '';
+  } else {
+    group.style.display = '';
+  }
+}
+
 async function addIncome() {
-  const date     = document.getElementById('iDate').value;
-  const guest    = document.getElementById('iGuest').value.trim();
-  const villa    = document.getElementById('iVilla').value;
-  const amount   = parseFloat(document.getElementById('iAmount').value);
-  const method   = document.getElementById('iMethod').value;
-  const channel  = document.getElementById('iChannel').value;
-  const checkin  = document.getElementById('iCheckin').value;
-  const checkout = document.getElementById('iCheckout').value;
-  const ref      = document.getElementById('iRef').value.trim();
-  const errEl    = document.getElementById('iErr');
+  const date        = document.getElementById('iDate').value;
+  const guest       = document.getElementById('iGuest').value.trim();
+  const villa       = document.getElementById('iVilla').value;
+  const amount      = parseFloat(document.getElementById('iAmount').value);
+  const method      = document.getElementById('iMethod').value;
+  const channel     = document.getElementById('iChannel').value;
+  const bankAccount = method === 'Cash' ? null : document.getElementById('iBankAccount').value;
+  const checkin     = document.getElementById('iCheckin').value;
+  const checkout    = document.getElementById('iCheckout').value;
+  const ref         = document.getElementById('iRef').value.trim();
+  const errEl       = document.getElementById('iErr');
 
   if (!date || !guest || !villa || !amount || amount <= 0 || !method || !channel || !checkout) {
     errEl.textContent = 'Please fill in all required fields. Checkout date is required.'; return;
+  }
+  if (method !== 'Cash' && !bankAccount) {
+    errEl.textContent = 'Please select a bank account.'; return;
   }
   errEl.textContent = 'Saving…';
 
   const { data, error } = await sb.from('income').insert({
     date, guest, villa, amount, method, channel,
-    checkin:     checkin || null,
+    bank_account: bankAccount || null,
+    checkin:      checkin || null,
     checkout,
-    booking_ref: ref || null
+    booking_ref:  ref || null
   }).select().single();
 
   if (error) {
@@ -798,20 +1272,23 @@ async function addIncome() {
   income.unshift({
     id: data.id, date: data.date, guest: data.guest, villa: data.villa,
     amount: parseFloat(data.amount), method: data.method, channel: data.channel,
-    checkin: data.checkin, checkout: data.checkout,
+    bankAccount: data.bank_account, checkin: data.checkin, checkout: data.checkout,
     ref: data.booking_ref, checkedOut: data.checked_out,
     qboStatus: data.qbo_status || null
   });
   renderIncome();
   updateMetrics();
+  showToast(`Booking saved — ${data.guest} · ${data.villa} · ${fmt(parseFloat(data.amount))}`, 'success');
   ['iGuest', 'iAmount', 'iRef', 'iCheckin', 'iCheckout'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('iMethod').value  = '';
-  document.getElementById('iChannel').value = '';
+  document.getElementById('iMethod').value      = '';
+  document.getElementById('iChannel').value     = '';
+  document.getElementById('iBankAccount').value = '';
+  toggleBankAccount();
 }
 
 async function deleteIncome(id) {
-  if (!confirm('Delete this booking? This cannot be undone.')) return;
-  const { error } = await sb.from('income').delete().eq('id', id);
+  if (!confirm('Delete this booking?')) return;
+  const { error } = await sb.from('income').update({ deleted_at: new Date().toISOString() }).eq('id', id);
   if (error) { alert('Could not delete. Please try again.'); return; }
   income = income.filter(e => e.id !== id);
   renderIncome();
@@ -826,14 +1303,14 @@ function renderIncome() {
   el.innerHTML = income.map(e => `
     <div class="entry-row">
       <div class="flex-1">
-        <div class="t-main">${e.guest} · ${e.villa}</div>
-        <div class="t-sub">${e.channel ? '[' + e.channel + '] ' : ''}${e.method} · Check-in: ${fmtDate(e.checkin)} → Checkout: ${fmtDate(e.checkout)}${e.ref ? ' · ' + e.ref : ''}</div>
+        <div class="t-main">${escHtml(e.guest)} · ${escHtml(e.villa)}</div>
+        <div class="t-sub">${e.channel ? '[' + escHtml(e.channel) + '] ' : ''}${escHtml(e.method)}${e.bankAccount ? ' → ' + escHtml(e.bankAccount) : ''} · Check-in: ${fmtDate(e.checkin)} → Checkout: ${fmtDate(e.checkout)}${e.ref ? ' · ' + escHtml(e.ref) : ''}</div>
       </div>
       <span class="badge ${e.checkedOut ? 'badge-checked' : 'badge-income'}">${e.checkedOut ? 'Checked Out' : 'Liability'}</span>
       <span class="t-pos t-right" style="min-width:80px;">+${fmt(e.amount)}</span>
       <span class="t-xs t-right" style="min-width:72px;">${fmtDate(e.date)}</span>
-      ${qboTag(e.qboStatus)}
-      ${!e.checkedOut
+      ${qboTag(e.qboStatus, 'income', e.id)}
+      ${!e.checkedOut && canDelete
         ? `<button class="btn btn-sm btn-danger" onclick="deleteIncome('${e.id}')">Delete</button>`
         : `<div style="width:55px;"></div>`}
     </div>
@@ -860,8 +1337,8 @@ function renderCheckouts() {
       <div class="checkout-row${overdue ? ' overdue' : ''}" id="co-${e.id}">
         <input type="checkbox" class="checkout-check" onchange="processCheckout('${e.id}', this)">
         <div class="flex-1">
-          <div class="t-main">${e.guest} · ${e.villa}</div>
-          <div class="t-sub">Expected checkout: ${fmtDate(e.checkout)} · ${e.method} · Invoice will be dated ${fmtDate(e.checkout)}</div>
+          <div class="t-main">${escHtml(e.guest)} · ${escHtml(e.villa)}</div>
+          <div class="t-sub">Expected checkout: ${fmtDate(e.checkout)} · ${escHtml(e.method)} · Invoice will be dated ${fmtDate(e.checkout)}</div>
         </div>
         ${overdue ? '<span class="overdue-pill">Overdue</span>' : ''}
         <span class="t-pos" style="font-size:15px;font-weight:800;">${fmt(e.amount)}</span>
@@ -871,6 +1348,10 @@ function renderCheckouts() {
 }
 
 async function processCheckout(id, checkbox) {
+  // Guard: ignore if a request for this booking is already in flight
+  if (_checkoutsInProgress.has(id)) { checkbox.checked = false; return; }
+  _checkoutsInProgress.add(id);
+
   const row = document.getElementById('co-' + id);
   if (row) row.classList.add('processed');
 
@@ -880,6 +1361,7 @@ async function processCheckout(id, checkbox) {
   }).eq('id', id);
 
   if (error) {
+    _checkoutsInProgress.delete(id);
     if (row) row.classList.remove('processed');
     checkbox.checked = false;
     alert('Could not process checkout. Please check your connection and try again.');
@@ -887,8 +1369,12 @@ async function processCheckout(id, checkbox) {
   }
 
   setTimeout(() => {
+    _checkoutsInProgress.delete(id);
     const entry = income.find(e => e.id === id);
-    if (entry) entry.checkedOut = true;
+    if (entry) {
+      entry.checkedOut = true;
+      showToast(`Checkout processed — ${escHtml(entry.guest)} · ${escHtml(entry.villa)}`, 'success');
+    }
     renderCheckouts();
     renderIncome();
     updateMetrics();
@@ -943,10 +1429,10 @@ function renderMovements() {
   el.innerHTML = rows.map(r => `
     <div class="mov-row">
       <div>
-        <div class="t-main" style="font-size:12px;">${r._desc}</div>
+        <div class="t-main" style="font-size:12px;">${escHtml(r._desc)}</div>
       </div>
       ${badgeFor(r)}
-      <span class="t-xs">${r._villa || '—'}</span>
+      <span class="t-xs">${escHtml(r._villa) || '—'}</span>
       <span class="t-xs">${fmtDate(r._date)}</span>
       <span class="${r._amount < 0 ? 't-neg' : 't-pos'} t-right">${r._amount < 0 ? '−' : '+'}${fmt(r._amount)}</span>
       <span class="t-xs">${r._method || '—'}</span>
@@ -960,7 +1446,9 @@ function renderMovements() {
 function calcCashBalance() {
   let bal = 0;
   income.filter(e => e.method === 'Cash').forEach(e => bal += e.amount);
-  cashManual.forEach(m => { m.type === 'atm' ? bal += m.amount : bal -= m.amount; });
+  cashManual.forEach(m => {
+    m.type === 'atm' ? bal += m.amount : bal -= m.amount;  // atm = cash in; salary/provider = cash out
+  });
   return bal;
 }
 
@@ -968,6 +1456,8 @@ async function addCashMovement() {
   const date     = document.getElementById('cDate').value;
   const amount   = parseFloat(document.getElementById('cAmount').value);
   const employee = document.getElementById('cEmployee').value.trim();
+  const supplier = document.getElementById('cSupplier').value.trim();
+  const category = document.getElementById('cProviderCategory').value;
   const notes    = document.getElementById('cNotes').value.trim();
   const errEl    = document.getElementById('cErr');
 
@@ -977,11 +1467,19 @@ async function addCashMovement() {
   if (_cashType === 'salary' && !employee) {
     errEl.textContent = 'Employee name is required for salary payments.'; return;
   }
+  if (_cashType === 'provider' && !supplier) {
+    errEl.textContent = 'Supplier name is required for provider payments.'; return;
+  }
+  if (_cashType === 'provider' && !category) {
+    errEl.textContent = 'Category is required for provider payments.'; return;
+  }
   errEl.textContent = 'Saving…';
 
   const { data, error } = await sb.from('cash_manual').insert({
     date, type: _cashType, amount,
     employee: employee || null,
+    supplier: supplier || null,
+    category: category || null,
     notes:    notes    || null
   }).select().single();
 
@@ -992,17 +1490,21 @@ async function addCashMovement() {
 
   cashManual.unshift({
     id: data.id, date: data.date, type: data.type,
-    amount: parseFloat(data.amount), employee: data.employee, notes: data.notes,
-    qboStatus: data.qbo_status || null
+    amount: parseFloat(data.amount), employee: data.employee,
+    supplier: data.supplier, category: data.category,
+    notes: data.notes, qboStatus: data.qbo_status || null
   });
   renderCash();
   updateMetrics();
-  ['cAmount', 'cEmployee', 'cNotes'].forEach(id => document.getElementById(id).value = '');
+  const _cashLabel = { atm: 'ATM withdrawal', salary: 'Salary payment', provider: 'Provider payment' }[data.type] || 'Cash movement';
+  showToast(`${_cashLabel} saved — ${fmt(parseFloat(data.amount))}`, 'success');
+  ['cAmount', 'cEmployee', 'cSupplier', 'cNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cProviderCategory').value = '';
 }
 
 async function deleteCashMovement(id) {
-  if (!confirm('Delete this cash movement? This cannot be undone.')) return;
-  const { error } = await sb.from('cash_manual').delete().eq('id', id);
+  if (!confirm('Delete this cash movement?')) return;
+  const { error } = await sb.from('cash_manual').update({ deleted_at: new Date().toISOString() }).eq('id', id);
   if (error) { alert('Could not delete. Please try again.'); return; }
   cashManual = cashManual.filter(m => m.id !== id);
   renderCash();
@@ -1015,32 +1517,32 @@ function renderCash() {
   income.filter(e => e.method === 'Cash').forEach(e => {
     ledger.push({
       id: e.id, date: e.date, type: 'cashin',
-      label: `Guest cash payment — ${e.guest} · ${e.villa}`,
+      label: `Guest cash payment — ${escHtml(e.guest)} · ${escHtml(e.villa)}`,
       amount: e.amount, isManual: false
     });
   });
 
   cashManual.forEach(m => {
-    ledger.push({
-      id: m.id, date: m.date, type: m.type,
-      label: m.type === 'atm'
-        ? `ATM Withdrawal${m.notes ? ' — ' + m.notes : ''}`
-        : `Salary payment — ${m.employee}${m.notes ? ' — ' + m.notes : ''}`,
-      amount: m.amount, isManual: true, qboStatus: m.qboStatus
-    });
+    const label = m.type === 'atm'
+      ? `ATM Withdrawal${m.notes ? ' — ' + escHtml(m.notes) : ''}`
+      : m.type === 'salary'
+      ? `Salary payment — ${escHtml(m.employee)}${m.notes ? ' — ' + escHtml(m.notes) : ''}`
+      : `Provider payment — ${escHtml(m.supplier)}${m.category ? ' · ' + escHtml(m.category) : ''}${m.notes ? ' — ' + escHtml(m.notes) : ''}`;
+    ledger.push({ id: m.id, date: m.date, type: m.type, label, amount: m.amount, isManual: true, qboStatus: m.qboStatus });
   });
 
   // Sort ascending to build running balance, then reverse for most-recent-first display
   ledger.sort((a, b) => a.date.localeCompare(b.date));
   let running = 0;
   ledger = ledger.map(entry => {
-    running += entry.type === 'salary' ? -entry.amount : entry.amount;
+    const isOut = entry.type === 'salary' || entry.type === 'provider';
+    running += isOut ? -entry.amount : entry.amount;
     return { ...entry, running };
   });
   ledger.reverse();
 
-  const totalIn  = ledger.reduce((s, e) => s + (e.type !== 'salary' ? e.amount : 0), 0);
-  const totalOut = ledger.reduce((s, e) => s + (e.type === 'salary' ? e.amount : 0), 0);
+  const totalIn  = ledger.reduce((s, e) => s + (['atm','cashin'].includes(e.type) ? e.amount : 0), 0);
+  const totalOut = ledger.reduce((s, e) => s + (['salary','provider'].includes(e.type) ? e.amount : 0), 0);
   const balance  = calcCashBalance();
 
   const balEl = document.getElementById('cashBalValue');
@@ -1056,9 +1558,10 @@ function renderCash() {
   }
 
   const badgeFor = type => {
-    if (type === 'cashin') return '<span class="badge badge-cashin">Cash In</span>';
-    if (type === 'atm')    return '<span class="badge badge-atm">ATM</span>';
-    return                        '<span class="badge badge-salary">Salary</span>';
+    if (type === 'cashin')   return '<span class="badge badge-cashin">Cash In</span>';
+    if (type === 'atm')      return '<span class="badge badge-atm">ATM</span>';
+    if (type === 'provider') return '<span class="badge badge-provider">Provider</span>';
+    return                          '<span class="badge badge-salary">Salary</span>';
   };
 
   listEl.innerHTML = ledger.map(e => `
@@ -1066,14 +1569,14 @@ function renderCash() {
       <span class="t-xs">${fmtDate(e.date)}</span>
       <div>
         <div class="t-main" style="font-size:12px;">${e.label}</div>
-        ${e.isManual ? qboTag(e.qboStatus) : ''}
+        ${e.isManual ? qboTag(e.qboStatus, 'cash_manual', e.id) : ''}
       </div>
       ${badgeFor(e.type)}
-      <span class="${e.type === 'salary' ? 't-neg' : 't-pos'} t-right">
-        ${e.type === 'salary' ? '−' : '+'}${fmt(e.amount)}
+      <span class="${(e.type === 'salary' || e.type === 'provider') ? 't-neg' : 't-pos'} t-right">
+        ${(e.type === 'salary' || e.type === 'provider') ? '−' : '+'}${fmt(e.amount)}
       </span>
       <span class="running-bal ${e.running >= 0 ? 'pos' : 'neg'}">${fmt(e.running)}</span>
-      ${e.isManual
+      ${e.isManual && canDelete
         ? `<button class="btn btn-sm btn-danger" onclick="deleteCashMovement('${e.id}')">Del</button>`
         : `<div></div>`}
     </div>
@@ -1081,18 +1584,272 @@ function renderCash() {
 }
 
 // ══════════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════════
+async function signIn() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+  errEl.textContent = 'Signing in…';
+
+  const { data: signInData, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { errEl.textContent = error.message; return; }
+  canDelete = signInData.session?.user?.user_metadata?.role === 'admin';
+
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('signOutBtn').style.display = '';
+
+  const today = todayStr();
+  ['eDate', 'iDate', 'cDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
+  });
+  await loadAllData();
+  startQBORealtime();
+  checkQBOStatus();
+  loadQBOLists();
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  QBO AUTOCOMPLETE — load customers + vendors once on startup
+// ══════════════════════════════════════════════════════════════
+async function loadQBOLists() {
+  try {
+    const res  = await fetch('https://lcewyjghjemhmgqqaqab.supabase.co/functions/v1/qbo-list');
+    if (!res.ok) return;
+    const { customers = [], vendors = [] } = await res.json();
+
+    const custList = document.getElementById('customerList');
+    const vendList = document.getElementById('vendorList');
+    custList.innerHTML = customers.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+    vendList.innerHTML = vendors.map(n => `<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+  } catch (e) {
+    console.warn('QBO list load failed (autocomplete unavailable):', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  QBO CONNECTION STATUS
+// ══════════════════════════════════════════════════════════════
+async function checkQBOStatus() {
+  const pill = document.getElementById('qboPill');
+  pill.style.display = '';
+  pill.className = 'qbo-pill checking';
+  pill.textContent = 'QBO: …';
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const res  = await fetch('https://lcewyjghjemhmgqqaqab.supabase.co/functions/v1/qbo-status', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    });
+    const data = await res.json();
+
+    if (data.connected) {
+      const daysLeft = data.refresh_token_expires_at
+        ? Math.floor((new Date(data.refresh_token_expires_at).getTime() - Date.now()) / 86400000)
+        : 999;
+      if (daysLeft <= 14) {
+        pill.className   = 'qbo-pill warning';
+        pill.textContent = `QBO: ⚠ Renew in ${daysLeft}d`;
+        pill.title       = 'QBO refresh token expiring soon — visit /qbo-connect to re-authorise';
+      } else {
+        pill.className   = 'qbo-pill connected';
+        pill.textContent = 'QBO: ✓ Connected';
+      }
+    } else {
+      pill.className   = 'qbo-pill disconnected';
+      pill.textContent = 'QBO: ✗ Disconnected';
+    }
+  } catch (e) {
+    pill.className   = 'qbo-pill disconnected';
+    pill.textContent = 'QBO: ✗ Error';
+    console.error('QBO status check failed:', e);
+  }
+}
+
+async function setNewPassword() {
+  const pw      = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  const errEl   = document.getElementById('setPasswordError');
+  if (pw.length < 8)    { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+  if (pw !== confirm)   { errEl.textContent = 'Passwords do not match.'; return; }
+  errEl.textContent = 'Saving…';
+
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if (error) { errEl.textContent = error.message; return; }
+
+  const { data: { session: pwSession } } = await sb.auth.getSession();
+  canDelete = pwSession?.user?.user_metadata?.role === 'admin';
+
+  // Password set — session is already active, go straight to the dashboard
+  document.getElementById('setPasswordOverlay').style.display = 'none';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  document.getElementById('signOutBtn').style.display = '';
+  const today = todayStr();
+  ['eDate', 'iDate', 'cDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+  await loadAllData();
+  startQBORealtime();
+  checkQBOStatus();
+  loadQBOLists();
+}
+
+// ══════════════════════════════════════════════════════════════
 //  GLOBAL EXPORTS
 //  Module scripts are scoped — functions called from HTML
 //  onclick/onchange attributes must be exposed on window.
 // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  CONTACT DRAWER
+// ══════════════════════════════════════════════════════════════
+let _contactId         = null;
+let _contactDebounce   = null;
+
+function triggerContactLookup(name) {
+  clearTimeout(_contactDebounce);
+  const trimmed = name.trim();
+  if (trimmed.length < 2) return;
+  _contactDebounce = setTimeout(() => openContactDrawer(trimmed), 450);
+}
+
+async function openContactDrawer(name) {
+  const drawer = document.getElementById('contactDrawer');
+  const nameEl = document.getElementById('cdName');
+  const tagEl  = document.getElementById('cdTag');
+  const msgEl  = document.getElementById('cdMsg');
+
+  nameEl.textContent = name;
+  msgEl.textContent  = '';
+  _contactId = null;
+
+  // Clear fields while loading
+  ['cdEmail','cdPhone','cdVat','cdNotes'].forEach(id => document.getElementById(id).value = '');
+  tagEl.textContent = '…';
+  tagEl.className   = 'contact-tag';
+  drawer.classList.add('open');
+
+  // Lookup by name (case-insensitive)
+  const { data } = await sb.from('contacts').select('*').ilike('name', name).maybeSingle();
+
+  if (data) {
+    _contactId = data.id;
+    document.getElementById('cdEmail').value = data.email      || '';
+    document.getElementById('cdPhone').value = data.phone      || '';
+    document.getElementById('cdVat').value   = data.vat_number || '';
+    document.getElementById('cdNotes').value = data.notes      || '';
+    tagEl.textContent = 'Existing contact';
+    tagEl.className   = 'contact-tag contact-tag-existing';
+  } else {
+    tagEl.textContent = 'New contact';
+    tagEl.className   = 'contact-tag contact-tag-new';
+  }
+}
+
+function closeContactDrawer() {
+  document.getElementById('contactDrawer').classList.remove('open');
+  clearTimeout(_contactDebounce);
+}
+
+async function saveContact() {
+  const name  = document.getElementById('cdName').textContent.trim();
+  const email = document.getElementById('cdEmail').value.trim();
+  const phone = document.getElementById('cdPhone').value.trim();
+  const vat   = document.getElementById('cdVat').value.trim();
+  const notes = document.getElementById('cdNotes').value.trim();
+  const msgEl = document.getElementById('cdMsg');
+  const tagEl = document.getElementById('cdTag');
+
+  msgEl.textContent = 'Saving…';
+  msgEl.style.color = '#a0aec0';
+
+  const payload = {
+    name,
+    email:      email || null,
+    phone:      phone || null,
+    vat_number: vat   || null,
+    notes:      notes || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  let error;
+  if (_contactId) {
+    ({ error } = await sb.from('contacts').update(payload).eq('id', _contactId));
+  } else {
+    const res = await sb.from('contacts').insert(payload).select().single();
+    error = res.error;
+    if (res.data) {
+      _contactId = res.data.id;
+      tagEl.textContent = 'Existing contact';
+      tagEl.className   = 'contact-tag contact-tag-existing';
+    }
+  }
+
+  if (error) {
+    msgEl.textContent = 'Could not save — ' + error.message;
+    msgEl.style.color = '#f56565';
+    return;
+  }
+  msgEl.textContent = 'Saved ✓';
+  msgEl.style.color = '#48bb78';
+  setTimeout(() => { msgEl.textContent = ''; }, 2500);
+}
+
 Object.assign(window, {
   switchTab, setExpenseType, setCashType,
-  addExpense, deleteExpense,
+  addExpense, deleteExpense, markBillPaid,
   addIncome, deleteIncome,
   processCheckout,
   addCashMovement, deleteCashMovement,
-  renderMovements
+  retryQBOSync, changeYear,
+  renderMovements,
+  signIn, signOut, setNewPassword,
+  saveContact, closeContactDrawer
 });
 </script>
+
+<!-- QBO autocomplete datalists — populated by loadQBOLists() on dashboard load -->
+<datalist id="customerList"></datalist>
+<datalist id="vendorList"></datalist>
+
+<!-- ── Contact Info Drawer ── -->
+<div id="contactDrawer" class="contact-drawer">
+  <div class="contact-drawer-header">
+    <div class="contact-drawer-header-inner">
+      <div class="contact-drawer-title" id="cdName">Contact</div>
+      <span class="contact-tag contact-tag-new" id="cdTag">New contact</span>
+    </div>
+    <button class="contact-drawer-close" onclick="closeContactDrawer()">✕</button>
+  </div>
+  <div class="contact-drawer-body">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="cdEmail" placeholder="email@example.com">
+    </div>
+    <div class="form-group">
+      <label>Phone</label>
+      <input type="tel" id="cdPhone" placeholder="+34 000 000 000">
+    </div>
+    <div class="form-group">
+      <label>VAT / NIF</label>
+      <input type="text" id="cdVat" placeholder="B12345678">
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input type="text" id="cdNotes" placeholder="Any additional info…">
+    </div>
+    <div class="contact-save-row">
+      <button class="btn btn-primary" onclick="saveContact()" style="padding:8px 16px;font-size:12px;">Save</button>
+      <span class="contact-saved-msg" id="cdMsg"></span>
+    </div>
+  </div>
+</div>
 </body>
 </html>
